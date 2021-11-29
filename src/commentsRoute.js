@@ -1,5 +1,6 @@
 const express = require("express");
 const router =  express.Router();
+var sqlite3 = require('sqlite3').verbose();
 
 const comments = [
     {id: 1111, location: "Arjeplog", replyto :"null", author: 1, content:"Detta är en kommentar om Arjeplog", posted: "2020-01-02 00:00:00"},
@@ -7,21 +8,54 @@ const comments = [
     {id: 1113, location: "Arjeplog", replyto : "null", author: 2, content:"Detta är en kommentar", posted: "2020-01-02 00:00:01"}
 ]
 
+let db = new sqlite3.Database("./weather.db", (err)=>{
+    if(err){
+        console.log(err.message);
+    }else{
+        console.log("connected to db");
+    }
+})
+
 //GET all comments
-router.get("/", function(req, res){
-    res.status(200).json(comments);
+router.get("/", (req, res)=>{
+    let sql = "select * from comment";
+    db.all(sql, [], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.send(rows);
+    });
 })
 
 //GET all comments on a city
 router.get("/:location", function(req, res){
-    var citycomments = comments.filter(comment=>comment.location==req.params.location).reverse();
-    if(req.query.id){
-        citycomments = citycomments.filter(comment=>comment.replyto==req.query.id);
-    }
-    if(citycomments){
-        res.status(200).json(citycomments);
+    //var citycomments = comments.filter(comment=>comment.location==req.params.location).reverse();
+    
+    if(req.query.id == "null"){
+        //citycomments = citycomments.filter(comment=>comment.replyto==req.query.id);
+        let sql = "select * from comment where location=? and replyto IS NULL";
+        db.all(sql, [req.params.location], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.send(rows);
+        });
+    }else if(req.query.id){
+        let sql = "select * from comment where location=? and replyto=?"
+        db.all(sql, [req.params.location,req.query.id], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.send(rows);
+        });
     }else{
-        res.status(404).json({msg: "No comments found"});
+        let sql = "select * from comment where location=?";
+        db.all(sql, [req.params.location], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.send(rows);
+        });
     }
 })
 

@@ -1,4 +1,4 @@
-var sqlite3 = require('sqlite3').verbose;
+var sqlite3 = require('sqlite3').verbose();
 const express = require("express");
 const router =  express.Router();
 
@@ -10,7 +10,7 @@ let db = new sqlite3.Database("./weather.db", (err)=>{
     }
 })
 
-router.get("/", function(req, res){
+router.get("/", (req, res)=>{
     let sql = "select * from climatecodes";
     db.all(sql, [], (err, rows)=>{
         if(err){

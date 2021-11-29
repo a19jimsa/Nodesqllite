@@ -47,7 +47,7 @@ class ChatDialog extends React.Component {
     }
 
     async componentDidMount(){
-        await fetch("/comments/"+this.props.name+"?id=null", {
+        await fetch("/comments/"+this.props.name, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         })
