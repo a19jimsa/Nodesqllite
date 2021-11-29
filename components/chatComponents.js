@@ -146,6 +146,7 @@ class ChatDialog extends React.Component {
                 <div className="messageBox">
                 {comments.map(tag=>
                     <div key={tag.id} className="messageContent">
+                        <div>{tag.replyto == null ? "": "Detta är en kommentar på " + tag.replyto}</div>
                         <div className="message">
                             <div><p>{tag.id}</p><p>{tag.content}</p></div>
                         </div>
@@ -219,7 +220,6 @@ class Answer extends React.Component {
                     <div className="answerMessage right">
                         <p>{tag.id}</p><p>{tag.content}</p>
                     </div>
-                    <div className="right"><ul><Like/><li onClick={this.removeComment.bind(this, tag.id)}>Ta bort</li><li>{tag.posted}</li></ul></div>
                 </div>)}
             </div>
             );

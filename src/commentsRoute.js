@@ -30,7 +30,6 @@ router.get("/", (req, res)=>{
 //GET all comments on a city
 router.get("/:location", function(req, res){
     //var citycomments = comments.filter(comment=>comment.location==req.params.location).reverse();
-    
     if(req.query.id == "null"){
         //citycomments = citycomments.filter(comment=>comment.replyto==req.query.id);
         let sql = "select * from comment where location=? and replyto IS NULL";
@@ -41,7 +40,7 @@ router.get("/:location", function(req, res){
         res.send(rows);
         });
     }else if(req.query.id){
-        let sql = "select * from comment where location=? and replyto=?"
+        let sql = "select * from comment where location=? and replyto=?";
         db.all(sql, [req.params.location,req.query.id], (err, rows)=>{
         if(err){
             throw err;
@@ -49,7 +48,7 @@ router.get("/:location", function(req, res){
         res.send(rows);
         });
     }else{
-        let sql = "select * from comment where location=?";
+        let sql = "select * from comment where location=? Order by id DESC";
         db.all(sql, [req.params.location], (err, rows)=>{
         if(err){
             throw err;

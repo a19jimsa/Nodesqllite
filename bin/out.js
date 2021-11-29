@@ -20616,7 +20616,7 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
         res.send(rows);
       });
     } else {
-      let sql = "select * from comment where location=?";
+      let sql = "select * from comment where location=? Order by id DESC";
       db.all(sql, [req.params.location], (err, rows) => {
         if (err) {
           throw err;
