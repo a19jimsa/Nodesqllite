@@ -1,14 +1,23 @@
+var sqlite3 = require('sqlite3').verbose;
 const express = require("express");
 const router =  express.Router();
 
-const climatecodes = [
-    {code: "Af", name: "Tropical rainforest climate Tropical Rainforest", color: "#960000"},
-    {code: "Am", name: "Tropical monsoon climate Tropical Monsoon", color: "#FF0000"}
-]
+let db = new sqlite3.Database("./weather.db", (err)=>{
+    if(err){
+        console.log(err.message);
+    }else{
+        console.log("connected to db");
+    }
+})
 
 router.get("/", function(req, res){
-    res.status(200).json(climatecodes);
-    console.log("Hämtade ut klimatkoder!");
-});
+    let sql = "select * from climatecodes";
+    db.all(sql, [], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.send(rows);
+    });
+})
 
 module.exports = router;
