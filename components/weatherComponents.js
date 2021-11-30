@@ -10,12 +10,28 @@ class Button extends React.Component{
 class Info extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {forecast: []};
+    }
+
+    async componentDidMount(){
+        await fetch("/forecast/"+this.props.name, {
+            method: 'GET'
+        })
+        .then((response) => response.json())
+        .then(result => {
+            this.setState({forecast: [result]});
+            console.log(result);
+        },
+        (error)=>{
+            this.state({isLoaded: true, error});
+        })
     }
 
     render() {
         return <div>
             <h1>{this.props.name}</h1>
-            <div className="about">{this.props.name}</div>
+            <div className="about">
+            </div>
             <div className="about">{this.props.name}</div>
             <Forecast name={this.props.name} days={this.props.date}/>
             <ChatDialog name={this.props.name}><h1>Väderchatt - {this.props.name}</h1></ChatDialog>
@@ -35,8 +51,7 @@ class Forecast extends React.Component{
 
     async componentDidMount(){
         await fetch("/forecast/"+this.props.name, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
+            method: 'GET'
         })
         .then((response) => response.json())
         .then(result => {
