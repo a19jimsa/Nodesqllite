@@ -37,7 +37,7 @@ router.get("/:location", function(req, res){
         if(err){
             throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
         });
     }else if(req.query.id){
         let sql = "select * from comment where location=? and replyto=?";
@@ -45,7 +45,7 @@ router.get("/:location", function(req, res){
         if(err){
             throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
         });
     }else{
         let sql = "select * from comment where location=? Order by id DESC";
@@ -53,19 +53,20 @@ router.get("/:location", function(req, res){
         if(err){
             throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
         });
     }
 })
 
-//GET specific comments on specific location
+//GET specific comment on specific location
 router.get("/:location/comment/:id", function(req, res){
-    const comment = comments.find((comment)=>comment.location==req.params.location && comment.id==req.params.id);
-    if(comment){
-        res.status(200).json(comment);
-    }else{
-        res.status(404).json({msg: "No comment found"});
-    }
+    let sql = "select * from comment where location=? and id=?";
+    db.all(sql, [req.params.location, req.params.id], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.status(200).send(rows);
+    });
 })
 
 //PUT change specific comment
@@ -81,36 +82,37 @@ router.put("/:location/comment/:id", express.json(), function(req, res){
 
 //POST Add comment to specific city
 router.post("/:location", express.json(), function(req, res){
-    if(comments.length <= 0){
-        req.body.id = 1111;
-    }
-    comments.push(req.body);
-    res.status(201).json(req.body);
-    console.log("La till kommentar!");
+    let sql = "insert into comment(id, location, replyto, author, content, posted) values(?,?,?,?,?,?)";
+    db.run(sql, [req.body.id, req.body.location, req.body.replyto, req.body.author, req.body.content, req.body.posted], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.status(201).send({msg: "Created comment"+rows});
+        console.log("Skapade kommentar");
+    });
 })
 
 // POST Add answer on specific comment on a city
 router.post("/:location/comment/:commentid", express.json(), function(req, res){
-    const comment = comments.find(comment=>comment.location==req.params.location&&comment.id==req.params.commentid);
-    console.log(req.params.commentid);
-    console.log(req.params.location);
-    if(comment){
-        comments.push(req.body);
-        res.status(201).json({msg: "Created answer comment"});
-    }else{
-        res.status(404).json({msg: "Could not answer that comment"});
-    }
+    let sql = "insert into comment(id, location, replyto, author, content, posted) values(?,?,?,?,?,?)";
+    db.run(sql, [req.body.id, req.body.location, req.body.replyto, req.body.author, req.body.content, req.body.posted], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.status(201).send({msg: "Created comment"+rows});
+        console.log("Skapade svar");
+    });
 })
 
 //DELETE remove comment from specific city
 router.delete("/:commentid", express.json(), function(req, res){
-    const comment = comments.findIndex((comment)=>comment.id==req.params.commentid);
-    if(comment < 0){
-        res.status(404).json({ms: "Could not delete"});
-    }else{
-        comments.splice(comment,1);
-        res.status(200).json({msg: "Removed comment"});
-    }
+    let sql = "delete from comment where id=?";
+    db.all(sql, [req.params.commentid], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.status(200).send(rows);
+    });
 })
 
 module.exports = router;

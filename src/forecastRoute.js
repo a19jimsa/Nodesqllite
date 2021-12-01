@@ -19,34 +19,43 @@ router.get("/", function(req, res){
 
 // GET latest forecast from date and city. G
 router.get("/:city/:date", function(req, res, next){
-    let sql = "select * from forecast where fromtime=? and name=? order by fromtime limit 1";
-    db.each(sql, [req.params.date, req.params.city], (err, rows)=>{
+    var totime = new Date(req.params.date);
+    totime.setDate(totime.getDate() + 3);
+    totime = totime.toISOString().substring(0, 10);
+    console.log(totime);
+    let sql = 'SELECT * FROM forecast where fromtime>=? and totime<=? and name=?';
+    db.all(sql, [req.params.date, totime, req.params.city], (err, rows)=>{
         if(err){
             throw err;
         }
-        console.log(req.params.date);
-        let obj = [];
-        let auxdata = JSON.parse(rows.auxdata);
-        var feed = {"name": rows.name, "fromtime": rows.fromtime, "totime": rows.totime, "auxdata":auxdata};
-        obj.push(feed);
-        res.json(obj);
+        if(rows.length > 0){
+            let obj = [];
+            for(var i = 0; i < rows.length; i++){
+                var feed = {"name": rows[i].name, "fromtime": rows[i].fromtime, "totime": rows[i].totime, "auxdata":JSON.parse(rows[i].auxdata)};
+                obj.push(feed);
+            }
+            res.status(200).send(obj);
+        }else{
+            next();
+        }
     });
-    next();
 })
 
-//GET All citys with code and date or date. VG
+
+//GET Specific forecast with code and date or date. VG
 router.get("/:code/:date", function(req, res){
-    let sql = "select info.name, climatecodes.code, forecast.fromtime from info, climatecodes, forecast where info.name=forecast.name and info.climatecode=climatecodes.code and climatecodes.code=?";
+    let sql = "select info.name as name, climatecodes.code as code from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
+    console.log(req.params.code);
     db.all(sql, [req.params.code], (err, rows)=>{
         if(err){
             throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
     });
 })
 
-//Get last forecast from specific city or specific date
-router.get("/:name", function(req, res, next){
+//Get last forecast from specific city DO not use in APP!
+router.get("/:name", function(req, res){
     let sql = "select * from forecast where name=? order by fromtime DESC limit 1";
         db.each(sql, [req.params.name], (err, rows)=>{
             if(err){
@@ -60,10 +69,9 @@ router.get("/:name", function(req, res, next){
                 res.json(feed);
             }
         });
-        next();
 })
 
-//GET last forecast of specific date
+//GET last forecast of specific date done. Returns the last forecast of a specific date. Do not USE in APP!
 router.get("/:date", function(req, res){
     console.log(req.params.date);
     let sql = "select * from forecast where fromtime LIKE '%"+req.params.date+"' order by fromtime DESC limit 1";

@@ -20605,7 +20605,7 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
         if (err) {
           throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
       });
     } else if (req.query.id) {
       let sql = "select * from comment where location=? and replyto=?";
@@ -20613,7 +20613,7 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
         if (err) {
           throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
       });
     } else {
       let sql = "select * from comment where location=? Order by id DESC";
@@ -20621,17 +20621,18 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
         if (err) {
           throw err;
         }
-        res.send(rows);
+        res.status(200).send(rows);
       });
     }
   });
   router.get("/:location/comment/:id", function(req, res) {
-    const comment = comments.find((comment2) => comment2.location == req.params.location && comment2.id == req.params.id);
-    if (comment) {
-      res.status(200).json(comment);
-    } else {
-      res.status(404).json({msg: "No comment found"});
-    }
+    let sql = "select * from comment where location=? and id=?";
+    db.all(sql, [req.params.location, req.params.id], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   router.put("/:location/comment/:id", express2.json(), function(req, res) {
     const comment = comments.findIndex((comment2) => comment2.location == req.params.location && comment2.id == req.params.id);
@@ -20643,32 +20644,33 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
     }
   });
   router.post("/:location", express2.json(), function(req, res) {
-    if (comments.length <= 0) {
-      req.body.id = 1111;
-    }
-    comments.push(req.body);
-    res.status(201).json(req.body);
-    console.log("La till kommentar!");
+    let sql = "insert into comment(id, location, replyto, author, content, posted) values(?,?,?,?,?,?)";
+    db.run(sql, [req.body.id, req.body.location, req.body.replyto, req.body.author, req.body.content, req.body.posted], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(201).send({msg: "Created comment" + rows});
+      console.log("Skapade kommentar");
+    });
   });
   router.post("/:location/comment/:commentid", express2.json(), function(req, res) {
-    const comment = comments.find((comment2) => comment2.location == req.params.location && comment2.id == req.params.commentid);
-    console.log(req.params.commentid);
-    console.log(req.params.location);
-    if (comment) {
-      comments.push(req.body);
-      res.status(201).json({msg: "Created answer comment"});
-    } else {
-      res.status(404).json({msg: "Could not answer that comment"});
-    }
+    let sql = "insert into comment(id, location, replyto, author, content, posted) values(?,?,?,?,?,?)";
+    db.run(sql, [req.body.id, req.body.location, req.body.replyto, req.body.author, req.body.content, req.body.posted], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(201).send({msg: "Created comment" + rows});
+      console.log("Skapade svar");
+    });
   });
   router.delete("/:commentid", express2.json(), function(req, res) {
-    const comment = comments.findIndex((comment2) => comment2.id == req.params.commentid);
-    if (comment < 0) {
-      res.status(404).json({ms: "Could not delete"});
-    } else {
-      comments.splice(comment, 1);
-      res.status(200).json({msg: "Removed comment"});
-    }
+    let sql = "delete from comment where id=?";
+    db.all(sql, [req.params.commentid], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   module2.exports = router;
 });
@@ -20691,30 +20693,38 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
     console.log("H\xE4mtade ut v\xE4derprognoser!");
   });
   router.get("/:city/:date", function(req, res, next) {
-    let sql = "select * from forecast where fromtime=? and name=? order by fromtime limit 1";
-    db.each(sql, [req.params.date, req.params.city], (err, rows) => {
+    var totime = new Date(req.params.date);
+    totime.setDate(totime.getDate() + 3);
+    totime = totime.toISOString().substring(0, 10);
+    console.log(totime);
+    let sql = "SELECT * FROM forecast where fromtime>=? and totime<=? and name=?";
+    db.all(sql, [req.params.date, totime, req.params.city], (err, rows) => {
       if (err) {
         throw err;
       }
-      console.log(req.params.date);
-      let obj = [];
-      let auxdata = JSON.parse(rows.auxdata);
-      var feed = {name: rows.name, fromtime: rows.fromtime, totime: rows.totime, auxdata};
-      obj.push(feed);
-      res.json(obj);
+      if (rows.length > 0) {
+        let obj = [];
+        for (var i = 0; i < rows.length; i++) {
+          var feed = {name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)};
+          obj.push(feed);
+        }
+        res.status(200).send(obj);
+      } else {
+        next();
+      }
     });
-    next();
   });
   router.get("/:code/:date", function(req, res) {
-    let sql = "select info.name, climatecodes.code, forecast.fromtime from info, climatecodes, forecast where info.name=forecast.name and info.climatecode=climatecodes.code and climatecodes.code=?";
+    let sql = "select info.name as name, climatecodes.code as code from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
+    console.log(req.params.code);
     db.all(sql, [req.params.code], (err, rows) => {
       if (err) {
         throw err;
       }
-      res.send(rows);
+      res.status(200).send(rows);
     });
   });
-  router.get("/:name", function(req, res, next) {
+  router.get("/:name", function(req, res) {
     let sql = "select * from forecast where name=? order by fromtime DESC limit 1";
     db.each(sql, [req.params.name], (err, rows) => {
       if (err) {
@@ -20728,7 +20738,6 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
         res.json(feed);
       }
     });
-    next();
   });
   router.get("/:date", function(req, res) {
     console.log(req.params.date);

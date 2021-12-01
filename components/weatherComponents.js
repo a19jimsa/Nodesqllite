@@ -10,11 +10,14 @@ class Button extends React.Component{
 class Info extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {forecast: []};
+        this.state = {forecast: [], code: "", date:""};
+        this.getClimateCodeForecast = this.getClimateCodeForecast.bind(this);
+        this.handleOnChangeCode = this.handleOnChangeCode.bind(this);
+        this.handleOnChangeDate = this.handleOnChangeDate.bind(this);
     }
 
-    async componentDidMount(){
-        await fetch("/forecast/"+this.props.name, {
+    async getClimateCodeForecast(){
+        await fetch("/forecast/"+this.state.code+"/"+this.state.date, {
             method: 'GET'
         })
         .then((response) => response.json())
@@ -27,16 +30,32 @@ class Info extends React.Component {
         })
     }
 
+    handleOnChangeCode(e){
+        this.setState({code: e.target.value});
+        console.log(e.target.value);
+    }
+
+    handleOnChangeDate(e){
+        this.setState({date: e.target.value});
+        console.log(e.target.value);
+    }
+
     render() {
         return <div>
             <h1>{this.props.name}</h1>
-            <div className="about">
-            </div>
             <div className="about">{this.props.name}</div>
             <Forecast name={this.props.name} days={this.props.date}/>
             <ChatDialog name={this.props.name}><h1>Väderchatt - {this.props.name}</h1></ChatDialog>
             <WelcomeDialog />
             <ClimateCode />
+            <div className="about">
+                <label>Klimatkod</label>
+                <input type="text" onChange={this.handleOnChangeCode} />
+                <label>Datum</label>
+                <input type="text" onChange={this.handleOnChangeDate} />
+                <button onClick={this.getClimateCodeForecast}>Hämta orter</button>
+                {this.forecast.map(tag => <div key={tag.code}><h2>{tag.code}</h2><h2>{tag.name}</h2></div>)}
+            </div>
             <CreateUserDialog />
         </div>;
     }
@@ -50,12 +69,12 @@ class Forecast extends React.Component{
     }
 
     async componentDidMount(){
-        await fetch("/forecast/"+this.props.name, {
+        await fetch("/forecast/"+this.props.name+"/2020-10-21", {
             method: 'GET'
         })
         .then((response) => response.json())
         .then(result => {
-            this.setState({isLoaded: true, forecast: [result]});
+            this.setState({isLoaded: true, forecast: result});
             console.log(result);
         },
         (error)=>{
@@ -110,6 +129,34 @@ class Forecast extends React.Component{
     }
 }
 
+class ForecastTable extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {forecast: []};
+    }
+
+    async componentDidMount(){
+        
+    }
+
+    render() { 
+        return <div>
+            <table>
+                <thead>
+                    <th>Väder</th>
+                    <th>Nederbörd</th>
+                    <th>Vind m/s</th>
+                    <th>Känns som C</th>
+                    <th>Luftfuktighet</th>
+                    <th>Lufttryck hPa</th>
+                </thead>
+                {this.state.forecast.map(tag => <tbody key={tag.TVALUE}>
+                </tbody>)}
+            </table>
+        </div>;
+    }
+}
+
 class Accordion extends React.Component {
     constructor(props) {
         super(props);
@@ -129,12 +176,9 @@ class Accordion extends React.Component {
 class ClimateCode extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {error: null, isLoaded: false, climatecodes: []};
         this.getData();
     }
-    //Properties specifies here
-    //State is an object the component need
-    state = {climatecodes: [
-    {code: "Af", name: "Tropical rainforest climate Tropical Rainforest", color: "#960000"}]};
 
     async getData(){
         const response = await fetch("/climatecodes", {
@@ -148,13 +192,20 @@ class ClimateCode extends React.Component {
     }
 
     render() {
-        return(
+        const {error, isLoaded, climatecodes} = this.state;
+        if(error){
+            return <div>{error.message}</div>
+        }else if(!isLoaded && climatecodes.length <= 0){
+            return <div>Loading...</div>
+        }else{
+            return(
             <table>
                 <tbody>
-                    {this.state.climatecodes.map(tag =><tr key={tag.code}><td>{tag.code}</td><td>{tag.name}</td><td>{tag.color}</td></tr>)}
+                    {climatecodes.map(tag =><tr key={tag.code}><td>{tag.code}</td><td>{tag.name}</td><td>{tag.color}</td></tr>)}
                 </tbody>
             </table>
         )
+        }
     }
 }
 
@@ -177,4 +228,3 @@ class WelcomeDialog extends React.Component {
         </Dialog>)
     }
 }
-

@@ -29,6 +29,7 @@ class ChatDialog extends React.Component {
         this.handleClick = this.handleClick.bind(this);
         this.handleOnChange = this.handleOnChange.bind(this);
         this.handleComment = this.handleComment.bind(this);
+        this.createAnswer = this.createAnswer.bind(this);
         this.state = {error: null,  isLoaded: false, comments: [], show: true, button: "Chatta", content: "", highestId: [], showAnswer: false, class: "none", active_id: null};
         this.getHighestId();
     }
@@ -74,7 +75,7 @@ class ChatDialog extends React.Component {
             "posted" : time
         }
         //HTML5 API Fetch
-        await fetch("/comments/"+this.props.name, {
+        await fetch("/comments/"+this.props.name+"/comment/"+replyto, {
             method: 'POST',
             headers: {'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -83,6 +84,7 @@ class ChatDialog extends React.Component {
             this.componentDidMount();
             this.handleClick();
             this.handleClick();
+            
         });
     }
 
@@ -103,6 +105,30 @@ class ChatDialog extends React.Component {
     handleComment(replyto){
         this.addComment(replyto);
         this.setState({active_id: null});
+    }
+
+    async createAnswer(){
+        const id = Math.max.apply(null, this.state.highestId.map(highestId => highestId.id))+1;
+        const time = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+        const data = {
+            "id" : id,
+            "location" : this.props.name,
+            "replyto" : null,
+            "author" : "1",
+            "content" : this.state.content,
+            "posted" : time
+        }
+        //create comment on city chatt
+        await fetch("/comments/"+this.props.name, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then((response) => response.json()).then(data => {
+            this.componentDidMount();
+            this.handleClick();
+            this.handleClick();
+        });
     }
 
     async removeComment(id){
@@ -161,7 +187,7 @@ class ChatDialog extends React.Component {
                 </div>
                 <div className="inputBox">
                     <input type="text" onChange={this.handleOnChange}></input>
-                    <button onClick={this.handleComment.bind(this, "null")}>Skicka</button>
+                    <button onClick={this.createAnswer}>Skicka</button>
                 </div>
             </Dialog>
             )
@@ -195,17 +221,6 @@ class Answer extends React.Component {
                 }
             )
         }
-    }
-
-    async removeComment(id){
-        //HTML5 API Fetch
-        await fetch("/comments/"+id, {
-            method: 'DELETE',
-            headers: {'Content-Type': 'application/json' }
-        })
-            .then((response) => response.json()).then(data => {
-            this.componentDidMount();
-        });
     }
 
     render() { 
