@@ -20693,10 +20693,15 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
     console.log("H\xE4mtade ut v\xE4derprognoser!");
   });
   router.get("/:city/:date", function(req, res, next) {
+    let number = 1;
+    if (req.query.number) {
+      number = parseInt(req.query.number);
+    } else {
+      number = 1;
+    }
     var totime = new Date(req.params.date);
-    totime.setDate(totime.getDate() + 3);
+    totime.setDate(totime.getDate() + number);
     totime = totime.toISOString().substring(0, 10);
-    console.log(totime);
     let sql = "SELECT * FROM forecast where fromtime>=? and totime<=? and name=?";
     db.all(sql, [req.params.date, totime, req.params.city], (err, rows) => {
       if (err) {
@@ -20725,14 +20730,8 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
     });
   });
   router.get("/:name", function(req, res, next) {
-    var number;
-    if (req.query.number) {
-      number = req.query.number;
-    } else {
-      number = 4;
-    }
-    let sql = "select * from forecast where name=? order by fromtime DESC limit ?";
-    db.all(sql, [req.params.name, number], (err, rows) => {
+    let sql = "select * from forecast where name=? order by fromtime DESC limit 4";
+    db.all(sql, [req.params.name], (err, rows) => {
       if (err) {
         throw err;
       }

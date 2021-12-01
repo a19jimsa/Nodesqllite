@@ -72,7 +72,7 @@ class Info extends React.Component {
 class Forecast extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {error: null, isLoaded: false, forecast: [], date: ""};
+        this.state = {error: null, isLoaded: false, forecast: [], date: "", number: 1};
         this.handleClick = this.handleClick.bind(this);
         this.onChangeDate = this.onChangeDate.bind(this);
         this.handleOnClickDate = this.handleOnClickDate.bind(this);
@@ -93,7 +93,7 @@ class Forecast extends React.Component{
     }
 
     async changeForecast(){
-        await fetch("/forecast/"+this.state.date, {
+        await fetch("/forecast/"+this.props.name+"/"+this.state.date+"?number="+this.state.number, {
             method: 'GET'
         })
         .then((response) => response.json())
@@ -106,8 +106,10 @@ class Forecast extends React.Component{
         })
     }
 
-    handleClick(){
-        this.componentDidMount();
+    handleClick(value){
+        this.setState({number: value});
+        console.log(this.state.number);
+        this.changeForecast();
     }
 
     onChangeDate(e){

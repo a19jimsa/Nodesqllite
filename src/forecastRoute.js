@@ -19,10 +19,15 @@ router.get("/", function(req, res){
 
 // GET latest forecast from date and city. G
 router.get("/:city/:date", function(req, res, next){
+    let number  = 1;
+    if(req.query.number){
+        number = parseInt(req.query.number);
+    }else{
+        number = 1;
+    }
     var totime = new Date(req.params.date);
-    totime.setDate(totime.getDate() + 3);
+    totime.setDate(totime.getDate() + number);
     totime = totime.toISOString().substring(0, 10);
-    console.log(totime);
     let sql = 'SELECT * FROM forecast where fromtime>=? and totime<=? and name=?';
     db.all(sql, [req.params.date, totime, req.params.city], (err, rows)=>{
         if(err){
@@ -41,7 +46,7 @@ router.get("/:city/:date", function(req, res, next){
     });
 })
 
-//GET Specific forecast with code and date or date. VG
+//GET Name and code from climatecodes and forecast and info with climatecode and date. VG
 router.get("/:code/:date", function(req, res){
     let sql = "select info.name as name, climatecodes.code as code from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
     console.log(req.params.code);
@@ -55,14 +60,8 @@ router.get("/:code/:date", function(req, res){
 
 //Get last forecast from specific city! Getting last 4 from forecast and adding to array with reverse order.
 router.get("/:name", function(req, res, next){
-    var number;
-    if(req.query.number){
-        number = req.query.number;
-    }else{
-        number = 4;
-    }
-    let sql = "select * from forecast where name=? order by fromtime DESC limit ?";
-        db.all(sql, [req.params.name, number], (err, rows)=>{
+    let sql = "select * from forecast where name=? order by fromtime DESC limit 4";
+        db.all(sql, [req.params.name], (err, rows)=>{
             if(err){
                 throw err;
             }
