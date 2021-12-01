@@ -85,7 +85,7 @@ class Forecast extends React.Component{
         .then((response) => response.json())
         .then(result => {
             this.setState({isLoaded: true, forecast: result});
-            console.log(result);
+            this.changeForecast();
         },
         (error)=>{
             this.state({isLoaded: true, error});
@@ -99,7 +99,6 @@ class Forecast extends React.Component{
         .then((response) => response.json())
         .then(result => {
             this.setState({isLoaded: true, forecast: result});
-            console.log(result);
         },
         (error)=>{
             this.state({isLoaded: true, error});
@@ -108,8 +107,7 @@ class Forecast extends React.Component{
 
     handleClick(value){
         this.setState({number: value});
-        console.log(this.state.number);
-        this.changeForecast();
+        this.componentDidMount();
     }
 
     onChangeDate(e){
