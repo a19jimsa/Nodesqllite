@@ -41,7 +41,6 @@ router.get("/:city/:date", function(req, res, next){
     });
 })
 
-
 //GET Specific forecast with code and date or date. VG
 router.get("/:code/:date", function(req, res){
     let sql = "select info.name as name, climatecodes.code as code from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
@@ -54,37 +53,46 @@ router.get("/:code/:date", function(req, res){
     });
 })
 
-//Get last forecast from specific city DO not use in APP!
-router.get("/:name", function(req, res){
-    let sql = "select * from forecast where name=? order by fromtime DESC limit 1";
-        db.each(sql, [req.params.name], (err, rows)=>{
+//Get last forecast from specific city! Getting last 4 from forecast and adding to array with reverse order.
+router.get("/:name", function(req, res, next){
+    var number;
+    if(req.query.number){
+        number = req.query.number;
+    }else{
+        number = 4;
+    }
+    let sql = "select * from forecast where name=? order by fromtime DESC limit ?";
+        db.all(sql, [req.params.name, number], (err, rows)=>{
             if(err){
                 throw err;
-            }else if(rows.name){
-                console.log(rows.name);
+            }
+            if(rows.length > 0){
                 let obj = [];
-                let auxdata = JSON.parse(rows.auxdata);
-                var feed = {"name": rows.name, "fromtime": rows.fromtime, "totime": rows.totime, "auxdata":auxdata};
-                obj.push(feed);
-                res.json(feed);
+                for(var i = rows.length-1; i >= 0; i--){
+                    var feed = {"name": rows[i].name, "fromtime": rows[i].fromtime, "totime": rows[i].totime, "auxdata":JSON.parse(rows[i].auxdata)};
+                    obj.push(feed);
+                }
+                res.status(200).send(obj);
+            }else{
+                next();
             }
         });
 })
 
-//GET last forecast of specific date done. Returns the last forecast of a specific date. Do not USE in APP!
+//GET last forecast of specific date done. Returns the last forecast of a specific date.!
 router.get("/:date", function(req, res){
     console.log(req.params.date);
-    let sql = "select * from forecast where fromtime LIKE '%"+req.params.date+"' order by fromtime DESC limit 1";
-    db.each(sql, [], (err, rows)=>{
+    let sql = 'SELECT * FROM forecast where fromtime like "%'+req.params.date+'%"';
+    db.all(sql, [], (err, rows)=>{
         if(err){
             throw err;
         }
-        console.log(req.params.date);
         let obj = [];
-        let auxdata = JSON.parse(rows.auxdata);
-        var feed = {"name": rows.name, "fromtime": rows.fromtime, "totime": rows.totime, "auxdata":auxdata};
-        obj.push(feed);
-        res.json(obj);
+        for(var i = rows.length-1; i >= 0; i--){
+            var feed = {"name": rows[i].name, "fromtime": rows[i].fromtime, "totime": rows[i].totime, "auxdata":JSON.parse(rows[i].auxdata)};
+            obj.push(feed);
+        }
+        res.status(200).send(obj);
     });
     
 })

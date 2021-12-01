@@ -20724,34 +20724,43 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
       res.status(200).send(rows);
     });
   });
-  router.get("/:name", function(req, res) {
-    let sql = "select * from forecast where name=? order by fromtime DESC limit 1";
-    db.each(sql, [req.params.name], (err, rows) => {
+  router.get("/:name", function(req, res, next) {
+    var number;
+    if (req.query.number) {
+      number = req.query.number;
+    } else {
+      number = 4;
+    }
+    let sql = "select * from forecast where name=? order by fromtime DESC limit ?";
+    db.all(sql, [req.params.name, number], (err, rows) => {
       if (err) {
         throw err;
-      } else if (rows.name) {
-        console.log(rows.name);
+      }
+      if (rows.length > 0) {
         let obj = [];
-        let auxdata = JSON.parse(rows.auxdata);
-        var feed = {name: rows.name, fromtime: rows.fromtime, totime: rows.totime, auxdata};
-        obj.push(feed);
-        res.json(feed);
+        for (var i = rows.length - 1; i >= 0; i--) {
+          var feed = {name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)};
+          obj.push(feed);
+        }
+        res.status(200).send(obj);
+      } else {
+        next();
       }
     });
   });
   router.get("/:date", function(req, res) {
     console.log(req.params.date);
-    let sql = "select * from forecast where fromtime LIKE '%" + req.params.date + "' order by fromtime DESC limit 1";
-    db.each(sql, [], (err, rows) => {
+    let sql = 'SELECT * FROM forecast where fromtime like "%' + req.params.date + '%"';
+    db.all(sql, [], (err, rows) => {
       if (err) {
         throw err;
       }
-      console.log(req.params.date);
       let obj = [];
-      let auxdata = JSON.parse(rows.auxdata);
-      var feed = {name: rows.name, fromtime: rows.fromtime, totime: rows.totime, auxdata};
-      obj.push(feed);
-      res.json(obj);
+      for (var i = rows.length - 1; i >= 0; i--) {
+        var feed = {name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)};
+        obj.push(feed);
+      }
+      res.status(200).send(obj);
     });
   });
   module2.exports = router;

@@ -10,23 +10,23 @@ class Button extends React.Component{
 class Info extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {forecast: [], code: "", date:""};
-        this.getClimateCodeForecast = this.getClimateCodeForecast.bind(this);
+        this.state = {isLoaded: false, forecast: [], code: "a", date:"2020-12-06"};
         this.handleOnChangeCode = this.handleOnChangeCode.bind(this);
         this.handleOnChangeDate = this.handleOnChangeDate.bind(this);
+        this.updateClimateCode = this.updateClimateCode.bind(this);
     }
 
-    async getClimateCodeForecast(){
+    async componentDidMount(){
         await fetch("/forecast/"+this.state.code+"/"+this.state.date, {
             method: 'GET'
         })
         .then((response) => response.json())
         .then(result => {
-            this.setState({forecast: [result]});
+            this.setState({forecast: result, isLoaded: true});
             console.log(result);
         },
         (error)=>{
-            this.state({isLoaded: true, error});
+            this.setState({isLoaded: false});
         })
     }
 
@@ -39,8 +39,15 @@ class Info extends React.Component {
         this.setState({date: e.target.value});
         console.log(e.target.value);
     }
-
+    
+    updateClimateCode(){
+        this.componentDidMount();
+    }
+    
     render() {
+        if(!this.state.isLoaded){
+            return <div>Loading...</div>
+        }else{
         return <div>
             <h1>{this.props.name}</h1>
             <div className="about">{this.props.name}</div>
@@ -53,23 +60,40 @@ class Info extends React.Component {
                 <input type="text" onChange={this.handleOnChangeCode} />
                 <label>Datum</label>
                 <input type="text" onChange={this.handleOnChangeDate} />
-                <button onClick={this.getClimateCodeForecast}>Hämta orter</button>
-                {this.forecast.map(tag => <div key={tag.code}><h2>{tag.code}</h2><h2>{tag.name}</h2></div>)}
+                <button onClick={this.updateClimateCode}>Hämta orter</button>
+                {this.state.forecast.map(tag => <div key={tag.name}><p>{tag.name}</p><p>{tag.code}</p></div>)}
             </div>
             <CreateUserDialog />
         </div>;
+        }
     }
 }
 
 class Forecast extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {error: null, isLoaded: false, forecast: []};
+        this.state = {error: null, isLoaded: false, forecast: [], date: ""};
         this.handleClick = this.handleClick.bind(this);
+        this.onChangeDate = this.onChangeDate.bind(this);
+        this.handleOnClickDate = this.handleOnClickDate.bind(this);
     }
 
     async componentDidMount(){
-        await fetch("/forecast/"+this.props.name+"/2020-10-21", {
+        await fetch("/forecast/"+this.props.name, {
+            method: 'GET'
+        })
+        .then((response) => response.json())
+        .then(result => {
+            this.setState({isLoaded: true, forecast: result});
+            console.log(result);
+        },
+        (error)=>{
+            this.state({isLoaded: true, error});
+        })
+    }
+
+    async changeForecast(){
+        await fetch("/forecast/"+this.state.date, {
             method: 'GET'
         })
         .then((response) => response.json())
@@ -86,12 +110,25 @@ class Forecast extends React.Component{
         this.componentDidMount();
     }
 
+    onChangeDate(e){
+        this.setState({date: e.target.value});
+        console.log(e.target.value);
+    }
+
+    handleOnClickDate(){
+        this.changeForecast();
+    }
+
     aside(){
         return(
         <aside>
             <button onClick={this.handleClick.bind(this, 1)}>1 dagsprognos</button>
             <button onClick={this.handleClick.bind(this, 3)}>3 dagarsprognos</button>
             <button onClick={this.handleClick.bind(this, 7)}>7 dagarsprognos</button>
+            <div>
+                <input type="text" onChange={this.onChangeDate} />
+                <button onClick={this.handleOnClickDate}>Ändra datum</button>
+            </div>
         </aside>)
     }
 
