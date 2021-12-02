@@ -10,24 +10,29 @@ class Button extends React.Component{
 class Info extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {isLoaded: false, forecast: [], code: "a", date:"2020-12-06"};
+        this.state = {isLoaded: true, forecast: [], code: "", date:""};
         this.handleOnChangeCode = this.handleOnChangeCode.bind(this);
         this.handleOnChangeDate = this.handleOnChangeDate.bind(this);
         this.updateClimateCode = this.updateClimateCode.bind(this);
     }
 
-    async componentDidMount(){
-        await fetch("/forecast/"+this.state.code+"/"+this.state.date, {
+    async updateClimateCode(){
+        if(this.state.code != "" && this.state.date != ""){
+            await fetch("/forecast/"+this.state.code+"/"+this.state.date, {
             method: 'GET'
-        })
-        .then((response) => response.json())
-        .then(result => {
-            this.setState({forecast: result, isLoaded: true});
-            console.log(result);
-        },
-        (error)=>{
-            this.setState({isLoaded: false});
-        })
+            })
+            .then((response) => response.json())
+            .then(result => {
+                this.setState({forecast: result, isLoaded: true});
+                console.log(result);
+            },
+            (error)=>{
+                this.setState({isLoaded: false});
+            })
+        }else{
+            alert("Du måste fylla i värden!");
+        }
+        
     }
 
     handleOnChangeCode(e){
@@ -38,10 +43,6 @@ class Info extends React.Component {
     handleOnChangeDate(e){
         this.setState({date: e.target.value});
         console.log(e.target.value);
-    }
-    
-    updateClimateCode(){
-        this.componentDidMount();
     }
     
     render() {
@@ -59,7 +60,7 @@ class Info extends React.Component {
                 <label>Klimatkod</label>
                 <input type="text" onChange={this.handleOnChangeCode} />
                 <label>Datum</label>
-                <input type="text" onChange={this.handleOnChangeDate} />
+                <input type="date" onChange={this.handleOnChangeDate} min="2020-01-01" max="2020-12-31"/>
                 <button onClick={this.updateClimateCode}>Hämta orter</button>
                 {this.state.forecast.map(tag => <div key={tag.name}><p>{tag.name}</p><p>{tag.code}</p></div>)}
             </div>
