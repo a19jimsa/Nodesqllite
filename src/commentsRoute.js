@@ -71,13 +71,13 @@ router.get("/:location/comment/:id", function(req, res){
 
 //PUT change specific comment
 router.put("/:location/comment/:id", express.json(), function(req, res){
-    const comment = comments.findIndex((comment)=>comment.location==req.params.location&&comment.id==req.params.id);
-    if(comment < 0){
-        res.status(404).json({msg: "Comment not found"});
-    }else{
-        comments.splice(comment, 1, req.body);
-        res.status(200).json({msg: "Updated comment"});
-    }
+    let sql = "update comment set content=? where location=? and id=?";
+    db.all(sql, [req.body.content, req.params.location, req.params.id], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.status(200).send(rows);
+    });
 })
 
 //POST Add comment to specific city

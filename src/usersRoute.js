@@ -1,5 +1,14 @@
+var sqlite3 = require('sqlite3').verbose();
 const express = require("express");
 const router =  express.Router();
+
+let db = new sqlite3.Database("./weather.db", (err)=>{
+    if(err){
+        console.log(err.message);
+    }else{
+        console.log("connected to db");
+    }
+})
 
 router.get("/", function(req, res){
     let sql = "select * from user";
@@ -47,7 +56,7 @@ router.post("/", express.json(), function(req, res){
 
 //DELETE specific user of name
 router.delete("/:name", function(req, res){
-    let sql = "delete user set username = ?";
+    let sql = "delete from user where username = ?";
     db.all(sql, [req.params.name], (err, rows)=>{
         if(err){
             throw err;

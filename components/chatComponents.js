@@ -252,6 +252,7 @@ class CreateUserDialog extends React.Component {
         this.createUser = this.createUser.bind(this);
         this.usernameOnChange = this.usernameOnChange.bind(this);
         this.emailOnChange = this.emailOnChange.bind(this);
+        this.deleteOnClick = this.deleteOnClick.bind(this);
         this.getUsers();
     }
 
@@ -284,6 +285,21 @@ class CreateUserDialog extends React.Component {
         })
     }
 
+    async removeUser(username){
+        await fetch("users/"+username, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+        })
+        .then((response) => response.json())
+        .then((data)=>{
+            alert("Tog bort" + username);
+        })
+    }
+    
+    deleteOnClick(username){
+        this.removeUser(username);
+    }
+
     handleClick(){
         this.state.show = !this.state.show;
         this.setState({show: this.state.show});
@@ -296,7 +312,6 @@ class CreateUserDialog extends React.Component {
     emailOnChange(e){
         this.setState({email: e.target.value});
     }
-
     showUsers(){
         if(this.state.users.length > 0){
             return (
@@ -304,7 +319,7 @@ class CreateUserDialog extends React.Component {
                     <h1>Användare</h1>
                     {this.state.users.map(tag=>
                     
-                    <div key={tag.id}>{tag.username}{tag.email}</div>
+                    <div key={tag.id}><p>{tag.id} {tag.username} {tag.email}<button onClick={this.deleteOnClick.bind(this, tag.username)}>Ta bort</button></p></div>
                     )}
                 </div>
             )

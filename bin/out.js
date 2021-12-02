@@ -20502,48 +20502,61 @@ var require_express2 = __commonJS((exports2, module2) => {
 
 // src/usersRoute.js
 var require_usersRoute = __commonJS((exports2, module2) => {
+  var sqlite3 = require("sqlite3").verbose();
   var express2 = require_express2();
   var router = express2.Router();
-  var users = [
-    {id: 1, username: "Jimmy", email: "jimmy@student.his.se"},
-    {id: 2, username: "Per", email: "per@worker.his.se"}
-  ];
+  var db = new sqlite3.Database("./weather.db", (err) => {
+    if (err) {
+      console.log(err.message);
+    } else {
+      console.log("connected to db");
+    }
+  });
   router.get("/", function(req, res) {
-    const usernames = users.map(({username}) => ({username}));
-    res.status(200).json(usernames);
+    let sql = "select * from user";
+    db.all(sql, [], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   router.get("/:name", function(req, res) {
-    console.log("Specifik user: " + req.params.name);
-    const user = users.find((user2) => user2.username == req.params.name);
-    if (user) {
-      res.type("application/json");
-      res.status(200).send(user);
-    } else {
-      res.status(404).json({msg: "user not found"});
-    }
+    let sql = "select * from user where name=?";
+    db.all(sql, [req.param.name], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   router.put("/:id", express2.json(), function(req, res) {
-    const user = users.findIndex((user2) => user2.id == req.params.id);
-    console.log(req.body);
-    if (user < 0) {
-      res.status(404).json({msg: "User not found"});
-    } else {
-      users.splice(user, 1, req.body);
-      res.status(200).json({msg: "Updated user"});
-    }
+    let sql = "update user set username = ?, email = ? where ?";
+    db.all(sql, [req.body.username, req.body.email, req.params.id], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   router.post("/", express2.json(), function(req, res) {
-    users.push(req.body);
-    res.status(201).json(req.body);
+    let sql = "insert into user(id, username, email) values(?,?,?)";
+    db.run(sql, [req.body.id, req.body.username, req.body.email], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(201).send({msg: "Created comment" + rows});
+      console.log("Skapade anv\xE4ndare");
+    });
   });
   router.delete("/:name", function(req, res) {
-    const rem = users.findIndex((u) => u.username == req.params.name);
-    if (rem < 0) {
-      res.status(404).json({msg: "User not found"});
-    } else {
-      users.splice(rem, 1);
-      res.status(200).json({msg: "User removed"});
-    }
+    let sql = "delete from user where username = ?";
+    db.all(sql, [req.params.name], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   module2.exports = router;
 });
