@@ -73,7 +73,7 @@ class Info extends React.Component {
 class Forecast extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {error: null, isLoaded: false, forecast: [], date: "", number: 1};
+        this.state = {error: null, isLoaded: false, forecast: [], date: "", number: 1, show: false};
         this.handleClick = this.handleClick.bind(this);
         this.onChangeDate = this.onChangeDate.bind(this);
         this.handleOnClickDate = this.handleOnClickDate.bind(this);
@@ -145,17 +145,21 @@ class Forecast extends React.Component{
             <div className="flex">
                 {this.aside()}
                 <div className="forecast">
-                    <div><Button value="collapse">Öppna alla</Button><p>Från</p><p>Till</p><p>Temperatur max/min</p><p>Nederbörd per dygn</p><p>Vind/byvind</p></div>
+                    <Button value="collapse">Öppna alla</Button>
+                    
+                    <div class="flex"><p>Från</p><p>Temperatur max/min</p><p>Nederbörd per dygn</p><p>Vind/byvind</p></div>
+
                     {forecast.map(tag =>
                     <div key={tag.name+tag.fromtime+tag.totime}>
-                        <div className="infoBox"><h2>{tag.fromtime}</h2><h2>{tag.totime}</h2><h2>{tag.auxdata.TVALUE}&#176;C</h2><h2>{tag.auxdata.RVALUE}{tag.auxdata.RUNIT}</h2><h2>{tag.auxdata.MPS}m/s</h2>
-                        </div>
-                        {tag.auxdata.map(tag2=>
-                        <div key={tag2.name+tag2.fromtime+tag2.totime}>
-                            <div className="infoBox"><h2>{tag2.fromtime}</h2><h2>{tag2.totime}</h2><h2>{tag2.auxdata.TVALUE}&#176;C</h2><h2>{tag2.auxdata.RVALUE}{tag2.auxdata.RUNIT}</h2><h2>{tag2.auxdata.MPS}m/s</h2>
-                        </div>
-                        </div>)}
 
+                        <div className="infoBox">
+                            {tag.auxdata.slice(0,1).map(tag2=><div className="flex" key={tag2.fromtime}><h2>{tag.fromtime.substring(0,10)}</h2><h2>{tag2.auxdata.TVALUE}&#176;C</h2><h2>{tag2.auxdata.RVALUE}{tag2.auxdata.RUNIT}</h2><h2>{tag2.auxdata.MPS}m/s</h2></div>)}
+                        </div>
+
+                        <table><thead><th>Tid</th><th>Väder</th><th>Nederbörd</th><th>Vind m/s</th><th>Lufttryck</th></thead><tbody>
+                        {tag.auxdata.map(tag2=>
+                        <tr key={tag2.name+tag2.fromtime+tag2.totime}><td>{tag2.fromtime.substring(11, 13)}</td><td>{tag2.auxdata.TVALUE}&#176;C</td><td>{tag2.auxdata.RVALUE}{tag2.auxdata.RUNIT}</td><td>{tag2.auxdata.MPS}m/s</td><td>{tag2.auxdata.VALUE}{tag2.auxdata.UNIT}</td>
+                        </tr>)}</tbody></table>
                     </div>
                     )}
                 </div>

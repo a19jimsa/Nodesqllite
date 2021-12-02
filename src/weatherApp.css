@@ -115,12 +115,20 @@ button:hover{
   background-color: #005ab9;
 }
 
+td{text-align: center;}
+
 .infoBox{
   display: flex;
   justify-content: space-around;
   align-items: center;
   height: 100px;
   width: 100%;
+  box-shadow: 0px 1px 3px 0px grey;
+  border-radius: 10px;
+}
+
+.infoBox:hover{
+  background-color: #def1ff;
 }
 
 #sidebar{
