@@ -287,3 +287,7 @@ ul > li{
   margin-bottom: 10px;
   padding: 10px;
 }
+
+table{
+  width: 100%;
+}

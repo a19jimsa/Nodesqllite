@@ -127,7 +127,7 @@ class Forecast extends React.Component{
             <button onClick={this.handleClick.bind(this, 3)}>3 dagarsprognos</button>
             <button onClick={this.handleClick.bind(this, 7)}>7 dagarsprognos</button>
             <div>
-                <input type="text" onChange={this.onChangeDate} />
+                <input type="date" min="2020-01-01" max="2020-12-31" onChange={this.onChangeDate} />
                 <button onClick={this.handleOnClickDate}>Ändra datum</button>
             </div>
         </aside>)
