@@ -48,7 +48,7 @@ router.get("/:city/:date", function(req, res, next){
 
 //GET Name and code from climatecodes and forecast and info with climatecode and date. VG
 router.get("/:code/:date", function(req, res){
-    let sql = "select info.name as name, climatecodes.code as code from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
+    let sql = "select info.name as name, climatecodes.code as code, info.country as country, info.about as about from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
     console.log(req.params.code);
     db.all(sql, [req.params.code], (err, rows)=>{
         if(err){

@@ -62,7 +62,7 @@ class Info extends React.Component {
                 <label>Datum</label>
                 <input type="date" onChange={this.handleOnChangeDate} min="2020-01-01" max="2020-12-31"/>
                 <button onClick={this.updateClimateCode}>Hämta orter</button>
-                {this.state.forecast.map(tag => <div key={tag.name}><p>{tag.name}</p><p>{tag.code}</p></div>)}
+                <table><thead><tr><th>Namn</th><th>Klimatkod</th><th>Land</th><th>Om</th></tr></thead><tbody>{this.state.forecast.map(tag => <tr key={tag.name}><td>{tag.name}</td><td>{tag.code}</td><td>{tag.country}</td><td>{tag.about}</td></tr>)}</tbody></table>
             </div>
             <CreateUserDialog />
         </div>;

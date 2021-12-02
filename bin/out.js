@@ -20720,7 +20720,7 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
     });
   });
   router.get("/:code/:date", function(req, res) {
-    let sql = "select info.name as name, climatecodes.code as code from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
+    let sql = "select info.name as name, climatecodes.code as code, info.country as country, info.about as about from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
     console.log(req.params.code);
     db.all(sql, [req.params.code], (err, rows) => {
       if (err) {
