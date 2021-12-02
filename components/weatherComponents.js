@@ -135,6 +135,7 @@ class Forecast extends React.Component{
 
     draw(){
         const {error, isLoaded, forecast} = this.state;
+        console.log(forecast);
         if(error){
             return <div>Error: {error.message}</div>;
         }else if(!isLoaded){
@@ -147,10 +148,14 @@ class Forecast extends React.Component{
                     <div><Button value="collapse">Öppna alla</Button><p>Från</p><p>Till</p><p>Temperatur max/min</p><p>Nederbörd per dygn</p><p>Vind/byvind</p></div>
                     {forecast.map(tag =>
                     <div key={tag.name+tag.fromtime+tag.totime}>
-                    <Accordion>
                         <div className="infoBox"><h2>{tag.fromtime}</h2><h2>{tag.totime}</h2><h2>{tag.auxdata.TVALUE}&#176;C</h2><h2>{tag.auxdata.RVALUE}{tag.auxdata.RUNIT}</h2><h2>{tag.auxdata.MPS}m/s</h2>
                         </div>
-                    </Accordion>
+                        {tag.auxdata.map(tag2=>
+                        <div key={tag2.name+tag2.fromtime+tag2.totime}>
+                            <div className="infoBox"><h2>{tag2.fromtime}</h2><h2>{tag2.totime}</h2><h2>{tag2.auxdata.TVALUE}&#176;C</h2><h2>{tag2.auxdata.RVALUE}{tag2.auxdata.RUNIT}</h2><h2>{tag2.auxdata.MPS}m/s</h2>
+                        </div>
+                        </div>)}
+
                     </div>
                     )}
                 </div>

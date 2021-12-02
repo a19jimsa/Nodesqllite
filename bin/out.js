@@ -20717,9 +20717,16 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
       }
       if (rows.length > 0) {
         let obj = [];
+        let auxdata = [];
+        var j = 0;
         for (var i = 0; i < rows.length; i++) {
-          var feed = {name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)};
-          obj.push(feed);
+          auxdata.push({name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)});
+          if ((i + 1) % 4 == 0) {
+            var feed = {name: rows[j].name, fromtime: rows[j].fromtime, totime: rows[j].totime, auxdata};
+            obj.push(feed);
+            auxdata = [];
+            j += 4;
+          }
         }
         res.status(200).send(obj);
       } else {
@@ -20745,8 +20752,12 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
       }
       if (rows.length > 0) {
         let obj = [];
+        let auxdata = [];
         for (var i = rows.length - 1; i >= 0; i--) {
-          var feed = {name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)};
+          auxdata.push({name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata: JSON.parse(rows[i].auxdata)});
+        }
+        for (var i = 0; i < 1; i++) {
+          var feed = {name: rows[i].name, fromtime: rows[i].fromtime, totime: rows[i].totime, auxdata};
           obj.push(feed);
         }
         res.status(200).send(obj);
