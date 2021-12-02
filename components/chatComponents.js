@@ -213,6 +213,7 @@ class ChatDialog extends React.Component {
                             <div><p>{tag.id}</p><p>{tag.content}</p></div>
                         </div>
                         <ul><Like id={tag.id} /><li onClick={this.show.bind(this, tag.id)}>Kommentera</li><li onClick={this.showUpdate.bind(this, tag.id)}>Uppdatera</li><li onClick={this.removeComment.bind(this, tag.id)}>Ta bort</li><li>{tag.posted}</li></ul>
+                        
                         <div className={this.state.active_id == tag.id ? this.state.class : "none"}>
                             <input type="text"onChange={this.handleOnChange}/>
                             <button onClick={this.handleComment.bind(this, tag.id)}>Svara</button>
