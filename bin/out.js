@@ -20509,7 +20509,7 @@ var require_usersRoute = __commonJS((exports2, module2) => {
     if (err) {
       console.log(err.message);
     } else {
-      console.log("connected to db");
+      console.log("Connected to db");
     }
   });
   router.get("/", function(req, res) {
@@ -20590,16 +20590,11 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
   var express2 = require_express2();
   var router = express2.Router();
   var sqlite3 = require("sqlite3").verbose();
-  var comments = [
-    {id: 1111, location: "Arjeplog", replyto: "null", author: 1, content: "Detta \xE4r en kommentar om Arjeplog", posted: "2020-01-02 00:00:00"},
-    {id: 1112, location: "Arjeplog", replyto: 1111, author: 2, content: "Detta \xE4r ett svar p\xE5 1111", posted: "2020-01-02 00:00:01"},
-    {id: 1113, location: "Arjeplog", replyto: "null", author: 2, content: "Detta \xE4r en kommentar", posted: "2020-01-02 00:00:01"}
-  ];
   var db = new sqlite3.Database("./weather.db", (err) => {
     if (err) {
       console.log(err.message);
     } else {
-      console.log("connected to db");
+      console.log("Connected to db");
     }
   });
   router.get("/", (req, res) => {
@@ -20648,13 +20643,13 @@ var require_commentsRoute = __commonJS((exports2, module2) => {
     });
   });
   router.put("/:location/comment/:id", express2.json(), function(req, res) {
-    const comment = comments.findIndex((comment2) => comment2.location == req.params.location && comment2.id == req.params.id);
-    if (comment < 0) {
-      res.status(404).json({msg: "Comment not found"});
-    } else {
-      comments.splice(comment, 1, req.body);
-      res.status(200).json({msg: "Updated comment"});
-    }
+    let sql = "update comment set content=? where location=? and id=?";
+    db.all(sql, [req.body.content, req.params.location, req.params.id], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   router.post("/:location", express2.json(), function(req, res) {
     let sql = "insert into comment(id, location, replyto, author, content, posted) values(?,?,?,?,?,?)";

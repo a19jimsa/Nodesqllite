@@ -2,17 +2,11 @@ const express = require("express");
 const router =  express.Router();
 var sqlite3 = require('sqlite3').verbose();
 
-const comments = [
-    {id: 1111, location: "Arjeplog", replyto :"null", author: 1, content:"Detta är en kommentar om Arjeplog", posted: "2020-01-02 00:00:00"},
-    {id: 1112, location: "Arjeplog", replyto : 1111, author: 2, content:"Detta är ett svar på 1111", posted: "2020-01-02 00:00:01"},
-    {id: 1113, location: "Arjeplog", replyto : "null", author: 2, content:"Detta är en kommentar", posted: "2020-01-02 00:00:01"}
-]
-
 let db = new sqlite3.Database("./weather.db", (err)=>{
     if(err){
         console.log(err.message);
     }else{
-        console.log("connected to db");
+        console.log("Connected to db");
     }
 })
 
