@@ -70,6 +70,52 @@ Dessa hämtar ut senaste forecasten som ligger i databasen och renderar detta p�
 
 I detta fall hämtar den senaste värderleksrapporten för Arjeplog eftersom det är valt sedan innan.
 
+För att kunna välja vilket datum som ska visas går det välja genom en datumlista vilken väderleksrapport som skall visas.
+
+```javascript
+
+
+// GET latest forecast from date and city. G
+router.get("/:city/:date", function(req, res, next){
+    let number  = 1;
+    if(req.query.number){
+        number = parseInt(req.query.number);
+    }else{
+        number = 1;
+    }
+    var totime = new Date(req.params.date);
+    totime.setDate(totime.getDate() + number);
+    totime = totime.toISOString().substring(0, 10);
+    let sql = 'SELECT * FROM forecast where fromtime>=? and totime<=? and name=?';
+    db.all(sql, [req.params.date, totime, req.params.city], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        if(rows.length > 0){
+            let obj = [];
+            let auxdata = [];
+            var j = 0;
+            for(var i = 0; i < rows.length; i++){
+                auxdata.push({"name": rows[i].name, "fromtime": rows[i].fromtime, "totime": rows[i].totime, "auxdata":JSON.parse(rows[i].auxdata)});
+                if((i+1) % 4 == 0){
+                    var feed = {"name": rows[j].name, "fromtime": rows[j].fromtime, "totime": rows[j].totime, "auxdata":auxdata};
+                    obj.push(feed);
+                    auxdata = [];
+                    j+=4;
+                }
+            }
+            res.status(200).send(obj);
+        }else{
+            next();
+        }
+    });
+})
+```
+
+Genom att välja ett datum körs denna endpoint. Den kollar även om det finns en fråga som är ett nummer på hur många dagar som skall tas med beroende på vad man klickar på. Den kan hämta ut 1,3,7 dagars värderleksrapporter. For-loopen ser till att rätt format kommer till frontend så det ritas ut korrekt sen får att se snyggt och propert ut. Det var det enda sättet att kunna få det snyggt och likna SMHI:s sida. Genom att lägga data i en array och skicka med som resultat.
+
+Om det inte hittas något värde så skickas istället till nästa funktion som är liknande endpoint som gör en annan fråga mot databasen. Ett sätt för att kunna använda samma endpoint fast med olika värden som skickas.
+
 För att hämta ut och skapa users användes en endpoint.
 
 Här hämtas alla användares användarnamn ut och renderas på sidan.
@@ -93,7 +139,7 @@ Det går även att skapa, uppdatera och ta bort användare. Genom följande endp
 ```javascript
 //Update specific user
 router.put("/:id", express.json(), function(req, res){
-    let sql = "update user set username = ?, email = ? where ?";
+    let sql = "update user set username = ?, email = ? where id=?";
     db.all(sql, [req.body.username, req.body.email, req.params.id], (err, rows)=>{
         if(err){
             throw err;
