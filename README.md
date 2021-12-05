@@ -116,6 +116,11 @@ Genom att välja ett datum körs denna endpoint. Den kollar även om det finns e
 
 Om det inte hittas något värde så skickas istället till nästa funktion som är liknande endpoint som gör en annan fråga mot databasen. Ett sätt för att kunna använda samma endpoint fast med olika värden som skickas.
 
+![image](https://user-images.githubusercontent.com/81629599/144758717-7f2b062c-b03c-4aad-9032-9a942b497640.png)
+
+Här så är ett specifik datum valts och ritar nu ut en tredagarsprognos ut. Det går då klicka på varje dag för att få fram tider och väderprognoser för datum och tid.
+
+
 För att hämta ut och skapa users användes en endpoint.
 
 Här hämtas alla användares användarnamn ut och renderas på sidan.
