@@ -20697,8 +20697,13 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
     }
   });
   router.get("/", function(req, res) {
-    res.status(200).json(forecasts);
-    console.log("H\xE4mtade ut v\xE4derprognoser!");
+    let sql = "select * from forecast limit 1000";
+    db.all(sql, [], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.status(200).send(rows);
+    });
   });
   router.get("/:city/:date", function(req, res, next) {
     let number = 1;
@@ -20735,9 +20740,9 @@ var require_forecastRoute = __commonJS((exports2, module2) => {
     });
   });
   router.get("/:code/:date", function(req, res) {
-    let sql = "select info.name as name, climatecodes.code as code, info.country as country, info.about as about from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
+    let sql = "select distinct Date(forecast.fromtime) as time, info.name as name, climatecodes.code as code, info.country as country from climatecodes inner join info on info.climatecode=climatecodes.code inner join forecast on info.name=forecast.name where code=? and Date(time)=? order by Date(time)";
     console.log(req.params.code);
-    db.all(sql, [req.params.code], (err, rows) => {
+    db.all(sql, [req.params.code, req.params.date], (err, rows) => {
       if (err) {
         throw err;
       }

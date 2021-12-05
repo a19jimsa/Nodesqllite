@@ -17,7 +17,7 @@ class Info extends React.Component {
     }
 
     async updateClimateCode(){
-        if(this.state.code != "" && this.state.date != ""){
+        if(this.state.date != ""){
             await fetch("/forecast/"+this.state.code+"/"+this.state.date, {
             method: 'GET'
             })
@@ -30,7 +30,7 @@ class Info extends React.Component {
                 this.setState({isLoaded: false});
             })
         }else{
-            alert("Du måste fylla i värden!");
+            alert("Du måste fylla i datum!");
         }
         
     }

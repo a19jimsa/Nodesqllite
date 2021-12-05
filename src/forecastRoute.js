@@ -13,8 +13,13 @@ let db = new sqlite3.Database("./weather.db", (err)=>{
 })
 
 router.get("/", function(req, res){
-    res.status(200).json(forecasts);
-    console.log("Hämtade ut väderprognoser!");
+    let sql = "select * from forecast limit 1000";
+    db.all(sql, [], (err, rows)=>{
+        if(err){
+            throw err;
+        }
+        res.status(200).send(rows);
+    });
 })
 
 // GET latest forecast from date and city. G
@@ -55,9 +60,9 @@ router.get("/:city/:date", function(req, res, next){
 
 //GET Name and code from climatecodes and forecast and info with climatecode and date. VG
 router.get("/:code/:date", function(req, res){
-    let sql = "select info.name as name, climatecodes.code as code, info.country as country, info.about as about from climatecodes inner join info on info.climatecode=climatecodes.code where code=?";
+    let sql = "select distinct Date(forecast.fromtime) as time, info.name as name, climatecodes.code as code, info.country as country from climatecodes inner join info on info.climatecode=climatecodes.code inner join forecast on info.name=forecast.name where code=? and Date(time)=? order by Date(time)";
     console.log(req.params.code);
-    db.all(sql, [req.params.code], (err, rows)=>{
+    db.all(sql, [req.params.code, req.params.date], (err, rows)=>{
         if(err){
             throw err;
         }
