@@ -110,7 +110,6 @@ router.get("/:date", function(req, res){
         }
         res.status(200).send(obj);
     });
-    
 })
 
 module.exports = router;

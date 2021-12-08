@@ -11,7 +11,7 @@ let db = new sqlite3.Database("./weather.db", (err)=>{
 })
 
 router.get("/", function(req, res){
-    let sql = "select * from user";
+    let sql = "select username from user";
     db.all(sql, [], (err, rows)=>{
         if(err){
             throw err;
@@ -23,7 +23,7 @@ router.get("/", function(req, res){
 //GET specific user of name
 router.get("/:name", function(req, res){
     let sql = "select * from user where name=?";
-    db.all(sql, [req.param.name], (err, rows)=>{
+    db.all(sql, [req.params.name], (err, rows)=>{
         if(err){
             throw err;
         }
